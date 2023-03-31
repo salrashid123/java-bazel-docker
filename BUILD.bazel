@@ -1,0 +1,38 @@
+
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@io_bazel_rules_docker//java:image.bzl", "java_image")
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "java-maven-lib",
+    srcs = [
+        "src/main/java/com/test/TestApp.java",
+    ],    
+    deps = [
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_cloud_google_cloud_storage",
+        "@maven//:com_google_auth_google_auth_library_oauth2_http",
+    ],
+)    
+
+java_binary(
+    name = "main",
+    main_class = "com.test.TestApp",
+    runtime_deps = [":java-maven-lib"],
+)
+
+container_image(
+    name = "server_image",
+    base = ":java_image",
+    ports = ["8080"],
+    repository = "us-central1-docker.pkg.dev/builder-project/r1/java_server",   
+)
+
+
+java_image(
+    name = "java_image",
+    main_class = "com.test.TestApp",
+    runtime_deps = [":java-maven-lib"],
+)

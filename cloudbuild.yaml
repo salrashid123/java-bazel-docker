@@ -1,0 +1,17 @@
+steps:
+- name: docker.io/salrashid123/bazel@sha256:77a63d2b9eb57aac7e40b4004869c4c5e2ad2bf85b3ab0de2cefba093a58bc11
+  id: build
+  args: ['run', ':server_image']
+
+- name: gcr.io/cloud-builders/docker
+  id: tag
+  args: ['tag', 'us-central1-docker.pkg.dev/builder-project/r1/java_server:server_image', 'us-central1-docker.pkg.dev/$PROJECT_ID/r1/java_server:server_image']
+  waitFor: ['build']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: push
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/r1/java_server:server_image']
+  waitFor: ['tag']
+
+options:
+  machineType: 'N1_HIGHCPU_32'
